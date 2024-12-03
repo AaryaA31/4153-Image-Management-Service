@@ -1,126 +1,73 @@
 from flask import Blueprint, jsonify, request
-from models import Review, Dish, db
-from schemas import ReviewSchema
+from models import Image, db
 from datetime import datetime
 
-# register blueprint and create schemas
-reviews_bp = Blueprint('reviews', __name__)
-review_schema = ReviewSchema()
-reviews_schema = ReviewSchema(many=True)
+# Register Blueprint
+images_bp = Blueprint('images', __name__)
 
-# POST /api/v1/reviews: Submit a new review
-@reviews_bp.route('/reviews', methods=['POST'])
-def submit_review():
+# POST /api/v1/reviews/{id}/images: Add or Update an Image for a Review
+@images_bp.route('/reviews/<int:review_id>/images', methods=['POST'])
+def add_or_update_image(review_id):
     '''
-    Endpoint to submit a review for a specified dish.
+    Endpoint to add or update an image for a specified review.
     ---
     tags:
-      - review-rating-service
+      - review-image-service
     parameters:
-      - name: body
-        in: body
+      - name: review_id
+        in: path
+        type: integer
         required: true
-        schema:
-          id: Review
-          required:
-            - dish_id
-            - rating
-          properties:
-            dish_id:
-              type: integer
-              description: The ID of the dish being reviewed
-              example: 1
-            rating:
-              type: integer
-              description: The rating of the dish out of 5
-              example: 4
-            review:
-              type: string
-              description: Comments from the reviewer
-              example: "Pretty good. Could be saltier."
+        description: ID of the review.
+        example: 1
+      - name: image
+        in: formData
+        type: file
+        required: true
+        description: The image file to upload.
     responses:
       201:
-        description: Review submitted.
-        properties:
-            id:
-              type: integer
-              example: 3
-            message:
-              type: string
-              example: "Review submitted."
-            _links:
-              type: object
-              properties:
-                collection:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/5/dish"
-                    method:
-                      type: string
-                      example: "GET"
-                submit:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews"
-                    method:
-                      type: string
-                      example: "POST"
-                delete:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "DELETE"
-                self:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "GET"
-                update:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "PUT"
+        description: Image added/updated.
       400:
-        description: Invalid input
+        description: Invalid input.
+      404:
+        description: Review not found.
     '''
-    data = request.json
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
 
-    dish = Dish.query.get(data['dish_id'])
-    if not dish:
-        return jsonify({"error": "Invalid dish_id"}), 400
-    
-    new_review = Review(**data)
-    db.session.add(new_review)
+    # Get the uploaded file
+    file = request.files['image']
+    binary_data = file.read()
+
+    # Check if the image already exists for the review
+    image = Image.query.filter_by(review_id=review_id).first()
+
+    if image:
+        # Update existing image
+        image.image_data = binary_data
+        image.updated_at = datetime.now()
+        message = "Image updated."
+    else:
+        # Add new image
+        image = Image(review_id=review_id, image_data=binary_data)
+        db.session.add(image)
+        message = "Image added."
+
     db.session.commit()
-    
-    return review_schema.jsonify({"id": new_review.id, "dish_id": dish.id, "message": "Review submitted"}), 201
+    return jsonify({"message": message, "review_id": review_id}), 201
 
-# GET /api/v1/reviews/{id}: Retrieve review details
-@reviews_bp.route('/reviews/<int:id>', methods=['GET'])
-def get_review(id):
+
+# GET /api/v1/reviews/{id}/images: Retrieve the Image for a Review
+@images_bp.route('/reviews/<int:review_id>/images', methods=['GET'])
+def get_image(review_id):
     '''
-    Endpoint to get a specified review.
+    Endpoint to get the image for a specified review.
     ---
     tags:
-      - review-rating-service
+      - review-image-service
     parameters:
-      - name: id
+      - name: review_id
         in: path
         type: integer
         required: true
@@ -128,193 +75,30 @@ def get_review(id):
         example: 1
     responses:
       200:
-        description: A review.
-        schema:
-          properties:
-            id:
-              type: integer
-              example: 1
-            dish_id:
-              type: integer
-              example: 3
-            rating:
-              type: integer
-              example: 4
-            review:
-              type: string
-              example: "Pretty good. Could be saltier."
-            created_at:
-              type: string
-              example: "2024-11-14 00:16:48.193448"
-            updated_at:
-              type: string
-              example: "2024-11-15 00:16:48.193448"
-            _links:
-              type: object
-              properties:
-                collection:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/5/dish"
-                    method:
-                      type: string
-                      example: "GET"
-                submit:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews"
-                    method:
-                      type: string
-                      example: "POST"
-                delete:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "DELETE"
-                self:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "GET"
-                update:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "PUT"
+        description: Image retrieved.
+        content:
+          image/jpeg: {}
       404:
-        description: Review not found.
+        description: Image not found.
     '''
-    review = db.session.query(Review).get(id)
-    if not review:
-        return jsonify({"error": "Review not found"}), 404
-    return review_schema.jsonify(review), 200
+    image = Image.query.filter_by(review_id=review_id).first()
+    if not image:
+        return jsonify({"error": "Image not found"}), 404
 
-# PUT /api/v1/reviews/{id}: Update review details
-@reviews_bp.route('/reviews/<int:id>', methods=['PUT'])
-def update_review(id):
+    # Return the binary data as a response
+    return (image.image_data, 200, {'Content-Type': 'image/jpeg'})
+
+
+# DELETE /api/v1/reviews/{id}/images: Delete the Image for a Review
+@images_bp.route('/reviews/<int:review_id>/images', methods=['DELETE'])
+def delete_image(review_id):
     '''
-    Endpoint to edit a specified review.
+    Endpoint to delete the image for a specified review.
     ---
     tags:
-      - review-rating-service
+      - review-image-service
     parameters:
-      - name: id
-        in: path
-        type: integer
-        required: true
-        description: ID of the review.
-        example: 1
-      - name: body
-        in: body
-        required: true
-        schema:
-          properties:
-            rating:
-              type: integer
-              example: 4
-            review:
-              type: string
-              example: "Pretty good. Could be saltier."
-    responses:
-      200:
-        description: Review updated.
-        schema:
-          properties:
-            id:
-              type: integer
-              example: 3
-            message:
-              type: string
-              example: "Review updated."
-            _links:
-              type: object
-              properties:
-                collection:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/5/dish"
-                    method:
-                      type: string
-                      example: "GET"
-                submit:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews"
-                    method:
-                      type: string
-                      example: "POST"
-                delete:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "DELETE"
-                self:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "GET"
-                update:
-                  type: object
-                  properties:
-                    href:
-                      type: string
-                      example: "/api/v1/reviews/3"
-                    method:
-                      type: string
-                      example: "PUT"
-      404:
-        description: Review not found.
-    '''
-    updated_data = request.json
-    review = db.session.query(Review).get(id)
-    if not review:
-        return jsonify({"error": "Review not found"}), 404
-    if 'rating' in updated_data:
-        review.rating = updated_data['rating']
-    if 'review' in updated_data:
-        review.review = updated_data['review']
-    review.updated_at = datetime.now()
-    db.session.commit()
-    return review_schema.jsonify({"id": review.id, "dish_id": review.dish_id, "message": "Review updated"}), 200
-
-# DELETE /api/v1/reviews/{id}: Delete a review
-@reviews_bp.route('/reviews/<int:id>', methods=['DELETE'])
-def delete_review(id):
-    '''
-    Endpoint to delete a specified review.
-    ---
-    tags:
-      - review-rating-service
-    parameters:
-      - name: id
+      - name: review_id
         in: path
         type: integer
         required: true
@@ -324,11 +108,12 @@ def delete_review(id):
       204:
         description: No content.
       404:
-        description: Review not found.
+        description: Image not found.
     '''
-    review = db.session.query(Review).get(id)
-    if not review:
-        return jsonify({"error": "Review not found"}), 404
-    db.session.delete(review)
+    image = Image.query.filter_by(review_id=review_id).first()
+    if not image:
+        return jsonify({"error": "Image not found"}), 404
+
+    db.session.delete(image)
     db.session.commit()
-    return jsonify({'message': 'Review successfully deleted'}), 204
+    return jsonify({"message": "Image successfully deleted"}), 204
