@@ -1,6 +1,5 @@
 from config import db
 from sqlalchemy import Column, Integer, BLOB
-from datetime import datetime
 
 class Image(db.Model):
     __tablename__ = 'images'
