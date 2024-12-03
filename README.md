@@ -1,26 +1,14 @@
 # 4153-dish-management-service
 
-This is a Flask-based microservice that connects to a MySQL database and provides RESTful endpoints for creating, retrieving, updating, and deleting dish records.
+This is a Flask-based microservice that connects to a MySQL database and provides RESTful endpoints for creating, retrieving, updating, and deleting Image records.
 
-## REST Endpoints
-
-### Dish Endpoints
+### Image Endpoints
 
 - **POST /api/v1/dishes**: Create a new dish
 - **GET /api/v1/dishes**: Retrieve a list of dishes (with optional filtering by name and category)
 - **GET /api/v1/dishes/{id}**: Retrieve detailed information about a specific dish
 - **PUT /api/v1/dishes/{id}**: Update details of an existing dish
 - **DELETE /api/v1/dishes/{id}**: Delete a dish
-
-### Dining Hall Endpoints
-
-- **GET /api/v1/dining_halls**: Retrieve a list of all dining halls (with optional filtering by name)
-- **POST /api/v1/dining_halls**: Create a new dining hall
-- **DELETE /api/v1/dining_halls/{id}**: Delete a dining hall
-- **GET /api/v1/stations**: Retrieve a list of all stations (with optional filtering by name)
-- **GET /api/v1/dining_halls/{id}/stations**: Retrieve all the stations within a specific dining hall (with optional filtering by name)
-- **POST /api/v1/dining_halls/{id}/stations**: Create a new station to a particular dining hall
-- **DELETE /api/v1/dining_halls/{id}/stations/{station_id}**: Delete a station within a specific dining hall
 
 ## Prerequisites
 
