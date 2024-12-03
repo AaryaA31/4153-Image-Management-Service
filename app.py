@@ -4,7 +4,7 @@ from flasgger import Swagger
 from config import config_db
 from flask_marshmallow import Marshmallow
 from middleware import before_request_logging, after_request_logging
-from routes.review_routes import reviews_bp
+from routes.image_routes import images_bp
 from routes.redirect_routes import redirect_bp
 
 
@@ -30,7 +30,7 @@ swagger = Swagger(app, template=template)
 app.before_request(before_request_logging)
 app.after_request(after_request_logging)
 
-app.register_blueprint(reviews_bp, url_prefix="/api/v1")
+app.register_blueprint(images_bp, url_prefix="/api/v1")
 app.register_blueprint(redirect_bp)
 
 if __name__ == '__main__':
