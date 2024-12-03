@@ -16,7 +16,7 @@ ma = Marshmallow(app)
 template = {
   "swagger": "2.0",
   "info": {
-    "title": "Review Rating Service",
+    "title": "Image Rating Service",
     "version": "0.0.1"
   },
   "host": "localhost:8000", 
