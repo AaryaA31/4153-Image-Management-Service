@@ -12,21 +12,3 @@ def config_db(app):
     with app.app_context():
         pass  # Database is already set up; no need to create tables.
 
-app = Flask(__name__)
-
-# Configure the app with the database
-config_db(app)
-
-# Define a simple route to test the connection
-@app.route('/test-db', methods=['GET'])
-def test_db():
-    try:
-        # Use SQLAlchemy's text for raw SQL
-        with db.engine.connect() as connection:
-            result = connection.execute(text("SELECT 1"))
-            return "Database connection successful! Result: {}".format(result.fetchone()), 200
-    except Exception as e:
-        return "Database connection failed: {}".format(str(e)), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
