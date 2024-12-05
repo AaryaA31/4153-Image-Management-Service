@@ -9,3 +9,22 @@ def config_db(app):
     db.init_app(app)
     with app.app_context():
         pass  # Database is already set up; no need to create tables.
+
+app = Flask(__name__)
+
+# Configure the app with the database
+config_db(app)
+
+# Define a simple route to test the connection
+@app.route('/test-db', methods=['GET'])
+def test_db():
+    try:
+        # Test the connection with a simple query
+        with db.engine.connect() as connection:
+            result = connection.execute("SELECT 1")
+            return "Database connection successful! Result: {}".format(result.fetchone()), 200
+    except Exception as e:
+        return "Database connection failed: {}".format(str(e)), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
