@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text  # Import text for raw SQL queries
 
 db = SQLAlchemy()
 
@@ -20,9 +21,9 @@ config_db(app)
 @app.route('/test-db', methods=['GET'])
 def test_db():
     try:
-        # Test the connection with a simple query
+        # Use SQLAlchemy's text for raw SQL
         with db.engine.connect() as connection:
-            result = connection.execute("SELECT 1")
+            result = connection.execute(text("SELECT 1"))
             return "Database connection successful! Result: {}".format(result.fetchone()), 200
     except Exception as e:
         return "Database connection failed: {}".format(str(e)), 500
