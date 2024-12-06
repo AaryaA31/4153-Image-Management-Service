@@ -8,10 +8,10 @@ from routes.image_routes import images_bp
 from routes.redirect_routes import redirect_bp
 
 
-app = Flask(__name__)
-CORS(app)
-config_db(app)
-ma = Marshmallow(app)
+application = Flask(__name__)
+CORS(application)
+config_db(application)
+ma = Marshmallow(application)
 
 template = {
   "swagger": "2.0",
@@ -25,13 +25,13 @@ template = {
   ],
 }
 
-swagger = Swagger(app, template=template)
+swagger = Swagger(application, template=template)
 
-app.before_request(before_request_logging)
-app.after_request(after_request_logging)
+application.before_request(before_request_logging)
+application.after_request(after_request_logging)
 
-app.register_blueprint(images_bp, url_prefix="/api/v1")
-app.register_blueprint(redirect_bp)
+application.register_blueprint(images_bp, url_prefix="/api/v1")
+application.register_blueprint(redirect_bp)
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    application.run(port=5000)
