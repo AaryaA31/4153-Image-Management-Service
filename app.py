@@ -19,7 +19,7 @@ template = {
     "title": "Image Rating Service",
     "version": "0.0.1"
   },
-  "host": "localhost:80", 
+  "host": "localhost:5000", 
   "schemes": [
     "http",
   ],
@@ -34,5 +34,5 @@ application.register_blueprint(images_bp, url_prefix="/api/v1")
 application.register_blueprint(redirect_bp)
 
 if __name__ == '__main__':
-    application.run(host='0.0.0.0', port=80)
+    application.run(host='0.0.0.0', port=5000)
 
