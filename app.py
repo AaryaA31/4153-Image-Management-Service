@@ -19,7 +19,7 @@ template = {
     "title": "Image Rating Service",
     "version": "0.0.1"
   },
-  "host": "54.174.122.55:80", 
+  "host": "localhost:80", 
   "schemes": [
     "http",
   ],
